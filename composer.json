@@ -1,65 +1,76 @@
 {
-  "name": "padosoft/laravel-rebel-bridge-fortify",
-  "description": "Bridge tra Laravel Fortify e Laravel Rebel: espone password-confirm/passkey/TOTP come step-up driver + event mapper e login passkey-first.",
-  "license": "MIT",
-  "keywords": [
-    "laravel",
-    "authentication",
-    "security",
-    "padosoft",
-    "rebel"
-  ],
-  "homepage": "https://github.com/padosoft/laravel-rebel-bridge-fortify",
-  "authors": [
-    {
-      "name": "Padosoft",
-      "email": "support@padosoft.com",
-      "homepage": "https://www.padosoft.com"
-    }
-  ],
-  "require": {
-    "php": "^8.3",
-    "illuminate/contracts": "^12.0|^13.0",
-    "illuminate/support": "^12.0|^13.0",
-    "spatie/laravel-package-tools": "^1.92",
-    "padosoft/laravel-rebel-core": "^0.1"
-  },
-  "require-dev": {
-    "larastan/larastan": "^3.0",
-    "laravel/pint": "^1.18",
-    "orchestra/testbench": "^10.0|^11.0",
-    "pestphp/pest": "^4.0",
-    "pestphp/pest-plugin-laravel": "^4.0"
-  },
-  "autoload": {
-    "psr-4": {
-      "Padosoft\\Rebel\\Bridge\\Fortify\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Padosoft\\Rebel\\Bridge\\Fortify\\Tests\\": "tests/"
-    }
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "Padosoft\\Rebel\\Bridge\\Fortify\\RebelFortifyBridgeServiceProvider"
-      ]
-    }
-  },
-  "scripts": {
-    "test": "pest",
-    "phpstan": "phpstan analyse --memory-limit=512M",
-    "pint": "pint"
-  },
-  "config": {
-    "sort-packages": true,
-    "allow-plugins": {
-      "pestphp/pest-plugin": true,
-      "phpstan/extension-installer": true
-    }
-  },
-  "minimum-stability": "stable",
-  "prefer-stable": true
+    "name": "padosoft/laravel-rebel-bridge-fortify",
+    "description": "Bridge between Laravel Fortify and Laravel Rebel: exposes password-confirm / passkey / TOTP as step-up drivers, maps Fortify events into the Rebel audit trail, and enables passkey-first login. Part of padosoft/laravel-rebel-*.",
+    "keywords": ["laravel", "authentication", "fortify", "passkey", "totp", "step-up", "padosoft", "rebel"],
+    "homepage": "https://github.com/padosoft/laravel-rebel-bridge-fortify",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Padosoft",
+            "email": "support@padosoft.com",
+            "homepage": "https://www.padosoft.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/contracts": "^12.0|^13.0",
+        "illuminate/support": "^12.0|^13.0",
+        "padosoft/laravel-rebel-core": "^0.1",
+        "padosoft/laravel-rebel-step-up": "^0.1",
+        "spatie/laravel-package-tools": "^1.92"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/fortify": "^1.21",
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^10.0|^11.0",
+        "padosoft/laravel-rebel-email-otp": "^0.1",
+        "pestphp/pest": "^4.0",
+        "pestphp/pest-plugin-laravel": "^4.0"
+    },
+    "suggest": {
+        "laravel/fortify": "Enables the TOTP step-up driver and the Fortify two-factor event mapping. Not required for password-confirm (framework hasher) or passkey (needs a PasskeyConfirmer binding).",
+        "padosoft/laravel-rebel-email-otp": "Enables the email-OTP fallback for passkey-first login."
+    },
+    "repositories": [
+        { "type": "vcs", "url": "https://github.com/padosoft/laravel-rebel-core" },
+        { "type": "vcs", "url": "https://github.com/padosoft/laravel-rebel-step-up" },
+        { "type": "vcs", "url": "https://github.com/padosoft/laravel-rebel-email-otp" }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Padosoft\\Rebel\\Bridge\\Fortify\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Padosoft\\Rebel\\Bridge\\Fortify\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Padosoft\\Rebel\\Bridge\\Fortify\\RebelFortifyBridgeServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "pest",
+        "phpstan": "phpstan analyse --memory-limit=512M",
+        "pint": "pint",
+        "check": [
+            "@pint --test",
+            "@phpstan",
+            "@test"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
