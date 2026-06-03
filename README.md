@@ -92,24 +92,25 @@ still works and the Fortify-only pieces are simply skipped.
 
 How "re-authenticate before a sensitive action" looks with each approach:
 
-| Capability | **Rebel Fortify Bridge** | Fortify alone | Laravel `password.confirm` | Hand-rolled |
-|---|:---:|:---:|:---:|:---:|
-| Re-confirm with a password | ✅ | ✅ | ✅ | ✅ |
-| Re-confirm with **TOTP** | ✅ | ❌ | ❌ | ❌ |
-| Re-confirm with a **passkey** | ✅ | ❌ | ❌ | ❌ |
-| **Per-action** required strength (AAL/AMR) | ✅ | ❌ | ❌ | ❌ |
-| Rejects a factor **below** the required assurance | ✅ | ❌ | ❌ | ❌ |
-| Passkey confirm bound to a single-use challenge | ✅ | ➖ | ❌ | ❌ |
-| Atomic, single-use recovery codes for step-up | ✅ | ➖ (login only) | ❌ | ❌ |
-| Confirmation decays after a TTL | ✅ | ➖ | ✅ | ❌ |
-| **PSD2/SCA dynamic linking** (amount+payee) | ✅ (via step-up) | ❌ | ❌ | ❌ |
-| Unified audit trail across login + 2FA + step-up | ✅ | ❌ | ❌ | ❌ |
-| Lockout audit with HMAC'd IP/identifier | ✅ | ❌ | ❌ | ❌ |
-| Multi-tenant aware | ✅ | ❌ | ❌ | ❌ |
+| Capability | **Rebel Fortify Bridge** | Shopify | Fortify alone | Laravel `password.confirm` | Hand-rolled |
+|---|:---:|:---:|:---:|:---:|:---:|
+| Re-confirm with a password | ✅ | ➖ | ✅ | ✅ | ✅ |
+| Re-confirm with **TOTP** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Re-confirm with a **passkey** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Per-action** required strength (AAL/AMR) | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Rejects a factor **below** the required assurance | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Passkey confirm bound to a single-use challenge | ✅ | ❌ | ➖ | ❌ | ❌ |
+| Atomic, single-use recovery codes for step-up | ✅ | ❌ | ➖ (login only) | ❌ | ❌ |
+| Confirmation decays after a TTL | ✅ | ➖ | ➖ | ✅ | ❌ |
+| **PSD2/SCA dynamic linking** (amount+payee) | ✅ (via step-up) | ❌ | ❌ | ❌ | ❌ |
+| Unified audit trail across login + 2FA + step-up | ✅ | ➖ | ❌ | ❌ | ❌ |
+| Lockout audit with HMAC'd IP/identifier | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Multi-tenant aware | ✅ | ❌ | ❌ | ❌ | ❌ |
 
-> Legend: ✅ built-in · ➖ partial / only in a narrow flow · ❌ not available. Fortify is
+> Legend: ✅ built-in · ➖ partial / only in a narrow flow / hosted-only / not exposed to you · ❌ not available. Fortify is
 > excellent at what it does (login, 2FA enrolment, passkey management) — this bridge builds
 > the *policy + audit* layer on top of it, it does not compete with it.
+> Note on Shopify: it is a **hosted, closed commerce platform** you can neither self-host nor extend — it exposes none of these re-authentication primitives to your own Laravel app, so it's a black box you don't control.
 
 ---
 
