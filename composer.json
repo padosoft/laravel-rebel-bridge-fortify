@@ -29,7 +29,7 @@
         "pestphp/pest-plugin-laravel": "^4.0"
     },
     "suggest": {
-        "laravel/fortify": "Required to actually use the Fortify-backed step-up drivers (password-confirm, TOTP, passkey) and the Fortify event mapper.",
+        "laravel/fortify": "Enables the TOTP step-up driver and the Fortify two-factor event mapping. Not required for password-confirm (framework hasher) or passkey (needs a PasskeyConfirmer binding).",
         "padosoft/laravel-rebel-email-otp": "Enables the email-OTP fallback for passkey-first login."
     },
     "repositories": [

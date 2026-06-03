@@ -23,6 +23,9 @@ use Padosoft\Rebel\Core\Contracts\AuditLogger;
  */
 final class PasskeyFirstLogin
 {
+    /** @var array<string, array<string, mixed>|null> */
+    private array $optionsCache = [];
+
     public function __construct(
         private readonly PasskeyAuthenticator $authenticator,
         private readonly AuditLogger $audit,
@@ -32,11 +35,20 @@ final class PasskeyFirstLogin
      * Begin login for an identifier. Returns passkey options, or null when no passkey
      * is available (the caller should then fall back, e.g. to email-OTP).
      *
+     * Memoized per identifier so that calling begin()/shouldFallBack() more than once
+     * in the same request does NOT make a real authenticator issue (and persist) a new
+     * single-use challenge each time — which would invalidate the challenge the browser
+     * already holds.
+     *
      * @return array<string, mixed>|null
      */
     public function begin(string $identifier): ?array
     {
-        return $this->authenticator->options($identifier);
+        if (! array_key_exists($identifier, $this->optionsCache)) {
+            $this->optionsCache[$identifier] = $this->authenticator->options($identifier);
+        }
+
+        return $this->optionsCache[$identifier];
     }
 
     /** True when the identifier has no passkey and the caller should fall back. */

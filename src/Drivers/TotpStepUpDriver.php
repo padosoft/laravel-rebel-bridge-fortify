@@ -52,7 +52,7 @@ final class TotpStepUpDriver implements StepUpDriver
 
     public function isAvailableFor(StepUpContext $context): bool
     {
-        return $this->secret($context) !== null;
+        return $this->twoFactorEnabled($context) && $this->secret($context) !== null;
     }
 
     public function start(StepUpContext $context): ?string
@@ -63,6 +63,10 @@ final class TotpStepUpDriver implements StepUpDriver
 
     public function verify(StepUpContext $context, string $input, ?string $reference): bool
     {
+        if (! $this->twoFactorEnabled($context)) {
+            return false;
+        }
+
         $secret = $this->secret($context);
 
         if ($secret === null) {
@@ -75,6 +79,25 @@ final class TotpStepUpDriver implements StepUpDriver
 
         // Fall back to a single-use recovery code.
         return $this->consumeRecoveryCode($context, $input);
+    }
+
+    /**
+     * Is two-factor authentication actually ENABLED for this subject?
+     *
+     * When the user model uses Fortify's `TwoFactorAuthenticatable` trait we defer to
+     * its `hasEnabledTwoFactorAuthentication()`, which correctly excludes a secret that
+     * is still pending confirmation (`two_factor_confirmed_at` is null). Without the
+     * trait we fall back to plain secret presence (checked separately by the caller).
+     */
+    private function twoFactorEnabled(StepUpContext $context): bool
+    {
+        $subject = $context->subject;
+
+        if (method_exists($subject, 'hasEnabledTwoFactorAuthentication')) {
+            return (bool) $subject->hasEnabledTwoFactorAuthentication();
+        }
+
+        return true;
     }
 
     private function secret(StepUpContext $context): ?string

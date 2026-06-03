@@ -9,6 +9,7 @@ use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Config\Repository;
 use Padosoft\Rebel\Core\Audit\AuditEvent;
 use Padosoft\Rebel\Core\Audit\AuthEventType;
 use Padosoft\Rebel\Core\Contracts\AuditLogger;
@@ -27,6 +28,7 @@ final class FortifyEventSubscriber
     public function __construct(
         private readonly AuditLogger $audit,
         private readonly KeyedHasher $hasher,
+        private readonly Repository $config,
     ) {}
 
     public function handleLogin(Login $event): void
@@ -49,7 +51,11 @@ final class FortifyEventSubscriber
         // Keep the lockout attributable for incident response, but store IP and
         // identifier as keyed HMACs (never plaintext PII) like the rest of the suite.
         $ip = $event->request->ip();
-        $email = $event->request->input('email');
+
+        // Use Fortify's configured username field (email by default), so apps that log in
+        // by username/phone still get an identifier_hmac.
+        $field = $this->config->get('fortify.username', 'email');
+        $email = $event->request->input(is_string($field) ? $field : 'email');
 
         $identifier = is_string($email) && $email !== '' ? $this->hasher->hash($email) : null;
         $ipHash = $ip !== null && $ip !== '' ? $this->hasher->hash($ip) : null;
