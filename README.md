@@ -314,6 +314,11 @@ RebelAuthEvent::query()->where('event_type', 'login.lockout')->get(); // IP/iden
 RebelAuthEvent::query()->where('event_type', 'fortify.two_factor.enabled')->get();
 ```
 
+**Rich login context (since 0.1.1).** Framework login/logout events are recorded with the request
+**IP** and **User-Agent** (keyed HMACs, never plaintext) and a successful password login records
+`aal = aal1` plus the `pwd` factor in `amr` — so the admin panel's Audit Explorer shows IP, country
+(via `laravel-rebel-core`'s geo capture), assurance and AMR for these events, not blanks.
+
 ---
 
 ## The assurance hierarchy (important)
