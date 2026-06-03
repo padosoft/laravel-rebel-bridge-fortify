@@ -6,6 +6,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-06-03
+
+### Changed
+- **Richer login audit context.** Framework login/logout events now record the request IP and
+  User-Agent (as keyed HMACs, never plaintext), and a successful login records `aal=aal1` plus
+  the `pwd` factor in `amr` when a password field is present. Previously only the guard + subject
+  were captured, leaving the audit detail's IP / User-Agent / assurance / AMR empty.
+
 ## [0.1.0] - 2026-06-03
 
 ### Added

@@ -10,6 +10,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Config\Repository;
+use Padosoft\Rebel\Core\Assurance\Aal;
 use Padosoft\Rebel\Core\Audit\AuditEvent;
 use Padosoft\Rebel\Core\Audit\AuthEventType;
 use Padosoft\Rebel\Core\Contracts\AuditLogger;
@@ -33,7 +34,13 @@ final class FortifyEventSubscriber
 
     public function handleLogin(Login $event): void
     {
-        $this->record(AuthEventType::LoginSucceeded->value, $event->guard, $event->user);
+        // A successful interactive login is at least AAL1. When Fortify's password field is
+        // present on the request we can attribute the `pwd` factor; a passkey/OTP login records
+        // its own richer event elsewhere (PasskeyFirstLogin / email-otp).
+        $request = request();
+        $amr = ($request->filled('password') || $request->filled('current_password')) ? ['pwd'] : null;
+
+        $this->record(AuthEventType::LoginSucceeded->value, $event->guard, $event->user, $amr, Aal::Aal1);
     }
 
     public function handleFailed(Failed $event): void
@@ -102,16 +109,29 @@ final class FortifyEventSubscriber
     /**
      * @param  list<string>|null  $amr
      */
-    private function record(string $type, ?string $guard, ?Authenticatable $user, ?array $amr = null): void
+    private function record(string $type, ?string $guard, ?Authenticatable $user, ?array $amr = null, ?Aal $aal = null): void
     {
         $id = $user?->getAuthIdentifier();
+
+        // Capture request context (IP + User-Agent) as keyed HMACs — never plaintext — so the
+        // audit detail is attributable for incident response. Outside an HTTP request (queue/CLI)
+        // these are simply null.
+        $request = request();
+        $ip = $request->ip();
+        $ua = $request->userAgent();
+        $ipHash = is_string($ip) && $ip !== '' ? $this->hasher->hash($ip) : null;
+        $uaHash = is_string($ua) && $ua !== '' ? $this->hasher->hash($ua) : null;
 
         $this->audit->record(new AuditEvent(
             type: $type,
             guard: $guard,
             subjectType: $user !== null ? $user::class : null,
             subjectId: is_scalar($id) ? (string) $id : null,
+            keyVersion: $ipHash?->keyVersion,
+            ipHmac: $ipHash?->hash,
+            userAgentHash: $uaHash?->hash,
             amr: $amr,
+            aal: $aal,
         ));
     }
 
